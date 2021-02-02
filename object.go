@@ -39,6 +39,7 @@ var (
 	S3_STORAGE_CLASS            = env.String("WORMHOL_S3_STORAGE_CLASS", s3.ObjectStorageClassOnezoneIa, env.Optional)
 	S3_LIST_OBJECTS_MAX_KEYS    = env.Int64("WORMHOL_S3_LIST_OBJECTS_MAX_KEYS", 1000, env.Optional)
 	CLOUDFLARE_ZONE             = env.String("WORMHOL_CLOUDFLARE_ZONE", "", env.Optional)
+	CLOUDFLARE_ZONE_ID          = env.String("WORMHOL_CLOUDFLARE_ZONE_ID", "", env.Optional)
 	CLOUDFLARE_HOST             = env.String("WORMHOL_CLOUDFLARE_HOST", "", env.Optional)
 	CLOUDFLARE_EMAIL            = env.String("WORMHOL_CLOUDFLARE_EMAIL", "", env.Optional)
 	CLOUDFLARE_KEY              = env.String("WORMHOL_CLOUDFLARE_KEY", "", env.Optional)
@@ -199,23 +200,34 @@ func (o *Object) Delete() error {
 }
 
 func (o *Object) purgeCache() error {
-	if CLOUDFLARE_ZONE != "" {
+	if CLOUDFLARE_ZONE != "" || CLOUDFLARE_ZONE_ID != "" {
 		var err error
 
-		if CLOUDFLARE_EMAIL != "" && CLOUDFLARE_KEY != "" {
-			cloudflareClient, err = cloudflare.New(CLOUDFLARE_KEY, CLOUDFLARE_EMAIL)
-		}
-		if CLOUDFLARE_TOKEN != "" {
-			cloudflareClient, err = cloudflare.NewWithAPIToken(CLOUDFLARE_TOKEN)
-		}
-		if CLOUDFLARE_USER_SERVICE_KEY != "" {
-			cloudflareClient, err = cloudflare.NewWithUserServiceKey(CLOUDFLARE_USER_SERVICE_KEY)
-		}
-		if err != nil {
-			return err
+		if cloudflareClient == nil {
+			if CLOUDFLARE_EMAIL != "" && CLOUDFLARE_KEY != "" {
+				cloudflareClient, err = cloudflare.New(CLOUDFLARE_KEY, CLOUDFLARE_EMAIL)
+			}
+			if CLOUDFLARE_TOKEN != "" {
+				cloudflareClient, err = cloudflare.NewWithAPIToken(CLOUDFLARE_TOKEN)
+			}
+			if CLOUDFLARE_USER_SERVICE_KEY != "" {
+				cloudflareClient, err = cloudflare.NewWithUserServiceKey(CLOUDFLARE_USER_SERVICE_KEY)
+			}
+			if err != nil {
+				cloudflareClient = nil
+				return err
+			}
+
+			if CLOUDFLARE_ZONE_ID == "" {
+				CLOUDFLARE_ZONE_ID, err = cloudflareClient.ZoneIDByName(CLOUDFLARE_ZONE)
+				if err != nil {
+					CLOUDFLARE_ZONE_ID = ""
+					return err
+				}
+			}
 		}
 
-		_, err = cloudflareClient.PurgeCache(CLOUDFLARE_ZONE, cloudflare.PurgeCacheRequest{
+		_, err = cloudflareClient.PurgeCache(CLOUDFLARE_ZONE_ID, cloudflare.PurgeCacheRequest{
 			Files: []string{
 				fmt.Sprintf("%s/%s", CLOUDFLARE_HOST, o.Key),
 				fmt.Sprintf("%s/%s/", CLOUDFLARE_HOST, o.Key),
