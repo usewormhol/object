@@ -190,7 +190,7 @@ func (o *Object) Delete() error {
 		return err
 	}
 
-	err = obj.purgeCache()
+	err = o.purgeCache()
 	if err != nil {
 		return err
 	}
