@@ -229,8 +229,8 @@ func (o *Object) purgeCache() error {
 
 		_, err = cloudflareClient.PurgeCache(CLOUDFLARE_ZONE_ID, cloudflare.PurgeCacheRequest{
 			Files: []string{
-				fmt.Sprintf("%s/%s", CLOUDFLARE_HOST, o.Key),
-				fmt.Sprintf("%s/%s/", CLOUDFLARE_HOST, o.Key),
+				fmt.Sprintf("https://%s/%s", CLOUDFLARE_HOST, o.Key),
+				fmt.Sprintf("https://%s/%s/", CLOUDFLARE_HOST, o.Key),
 			},
 		})
 		if err != nil {
