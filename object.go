@@ -38,11 +38,12 @@ var (
 	S3_SSE                      = env.String("WORMHOL_S3_SSE", s3.ServerSideEncryptionAes256, env.Optional)
 	S3_STORAGE_CLASS            = env.String("WORMHOL_S3_STORAGE_CLASS", s3.ObjectStorageClassOnezoneIa, env.Optional)
 	S3_LIST_OBJECTS_MAX_KEYS    = env.Int64("WORMHOL_S3_LIST_OBJECTS_MAX_KEYS", 1000, env.Optional)
-	CLOUDFLARE_ZONE             = env.String("CLOUDFLARE_ZONE", "", env.Optional)
-	CLOUDFLARE_EMAIL            = env.String("CLOUDFLARE_EMAIL", "", env.Optional)
-	CLOUDFLARE_KEY              = env.String("CLOUDFLARE_KEY", "", env.Optional)
-	CLOUDFLARE_TOKEN            = env.String("CLOUDFLARE_TOKEN", "", env.Optional)
-	CLOUDFLARE_USER_SERVICE_KEY = env.String("CLOUDFLARE_USER_SERVICE_KEY", "", env.Optional)
+	CLOUDFLARE_ZONE             = env.String("WORMHOL_CLOUDFLARE_ZONE", "", env.Optional)
+	CLOUDFLARE_HOST             = env.String("WORMHOL_CLOUDFLARE_HOST", "", env.Optional)
+	CLOUDFLARE_EMAIL            = env.String("WORMHOL_CLOUDFLARE_EMAIL", "", env.Optional)
+	CLOUDFLARE_KEY              = env.String("WORMHOL_CLOUDFLARE_KEY", "", env.Optional)
+	CLOUDFLARE_TOKEN            = env.String("WORMHOL_CLOUDFLARE_TOKEN", "", env.Optional)
+	CLOUDFLARE_USER_SERVICE_KEY = env.String("WORMHOL_CLOUDFLARE_USER_SERVICE_KEY", "", env.Optional)
 	OBJECT_KEY_BASE             = env.String("WORMHOL_OBJECT_KEY_BASE", "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz", env.Optional)
 	OBJECT_KEY_LENGTH           = env.Int("WORMHOL_OBJECT_KEY_LENGTH", 4, env.Optional)
 	OBJECT_KEY_DELAY_MAX        = time.Duration(env.Int("WORMHOL_OBJECT_KEY_DELAY_MAX_SECONDS", 5, env.Optional)) * time.Second
@@ -204,7 +205,10 @@ func (o *Object) purgeCache() error {
 		}
 
 		_, err = cloudflareClient.PurgeCache(CLOUDFLARE_ZONE, cloudflare.PurgeCacheRequest{
-			Files: []string{o.Key},
+			Files: []string{
+				fmt.Sprintf("%s/%s", CLOUDFLARE_HOST, o.Key),
+				fmt.Sprintf("%s/%s/", CLOUDFLARE_HOST, o.Key),
+			},
 		})
 		if err != nil {
 			return err
