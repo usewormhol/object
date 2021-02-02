@@ -180,11 +180,22 @@ func List() ([]*Object, error) {
 }
 
 func (o *Object) Delete() error {
-	_, err := s3Client.DeleteObject(&s3.DeleteObjectInput{
+	var err error
+
+	_, err = s3Client.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(S3_BUCKET),
 		Key:    aws.String(o.Key),
 	})
-	return err
+	if err != nil {
+		return err
+	}
+
+	err = obj.purgeCache()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (o *Object) purgeCache() error {
@@ -230,9 +241,6 @@ func Reap() (int, error) {
 	for _, obj := range objects {
 		if obj.LastModified.Add(OBJECT_TIME_TO_LIVE).Before(now) {
 			if err := obj.Delete(); err != nil {
-				return n, err
-			}
-			if err := obj.purgeCache(); err != nil {
 				return n, err
 			}
 			n++
