@@ -1,10 +1,9 @@
-module github.com/usewormhol/object
+module wormhol.org/object
 
-go 1.15
+go 1.16
 
 require (
-	github.com/aws/aws-sdk-go v1.36.23
-	github.com/cloudflare/cloudflare-go v0.13.8
-	github.com/usewormhol/env v1.0.0
-	github.com/usewormhol/random v1.0.0
+	bejarano.io/env v1.0.0
+	github.com/aws/aws-sdk-go v1.38.8
+	github.com/cloudflare/cloudflare-go v0.15.0
 )

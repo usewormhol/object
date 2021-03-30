@@ -1,21 +1,21 @@
 package object
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/url"
 	"strings"
 	"time"
 
-	"github.com/usewormhol/env"
-	"github.com/usewormhol/random"
-
+	"bejarano.io/env"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/cloudflare/cloudflare-go"
+	"wormhol.org/object/random"
 )
 
 type Object struct {
@@ -37,7 +37,7 @@ var (
 	S3_ACL                      = env.String("WORMHOL_S3_ACL", s3.ObjectCannedACLPrivate, env.Optional)
 	S3_SSE                      = env.String("WORMHOL_S3_SSE", s3.ServerSideEncryptionAes256, env.Optional)
 	S3_STORAGE_CLASS            = env.String("WORMHOL_S3_STORAGE_CLASS", s3.ObjectStorageClassOnezoneIa, env.Optional)
-	S3_LIST_OBJECTS_MAX_KEYS    = env.Int64("WORMHOL_S3_LIST_OBJECTS_MAX_KEYS", 1000, env.Optional)
+	S3_LIST_OBJECTS_MAX_KEYS    = int64(env.Int("WORMHOL_S3_LIST_OBJECTS_MAX_KEYS", 1000, env.Optional))
 	CLOUDFLARE_ZONE             = env.String("WORMHOL_CLOUDFLARE_ZONE", "", env.Optional)
 	CLOUDFLARE_ZONE_ID          = env.String("WORMHOL_CLOUDFLARE_ZONE_ID", "", env.Optional)
 	CLOUDFLARE_HOST             = env.String("WORMHOL_CLOUDFLARE_HOST", "", env.Optional)
@@ -50,8 +50,8 @@ var (
 	OBJECT_KEY_DELAY_MAX        = time.Duration(env.Int("WORMHOL_OBJECT_KEY_DELAY_MAX_SECONDS", 5, env.Optional)) * time.Second
 	OBJECT_NAME_LENGTH_MIN      = env.Int("WORMHOL_OBJECT_NAME_LENGTH_MIN", 1, env.Optional)
 	OBJECT_NAME_LENGTH_MAX      = env.Int("WORMHOL_OBJECT_NAME_LENGTH_MAX", 255, env.Optional)
-	OBJECT_SIZE_MIN             = env.Int64("WORMHOL_OBJECT_SIZE_MIN_BYTES", 0, env.Optional)
-	OBJECT_SIZE_MAX             = env.Int64("WORMHOL_OBJECT_SIZE_MAX_BYTES", 5*1000000000, env.Optional)
+	OBJECT_SIZE_MIN             = int64(env.Int("WORMHOL_OBJECT_SIZE_MIN_BYTES", 0, env.Optional))
+	OBJECT_SIZE_MAX             = int64(env.Int("WORMHOL_OBJECT_SIZE_MAX_BYTES", 5*1000000000, env.Optional))
 	OBJECT_TIME_TO_LIVE         = time.Duration(env.Int("WORMHOL_OBJECT_TIME_TO_LIVE_SECONDS", 60*60*24*3-1, env.Optional)) * time.Second
 
 	errObjectKeyInvalid                = errors.New("object key invalid")
@@ -227,7 +227,7 @@ func (o *Object) purgeCache() error {
 			}
 		}
 
-		_, err = cloudflareClient.PurgeCache(CLOUDFLARE_ZONE_ID, cloudflare.PurgeCacheRequest{
+		_, err = cloudflareClient.PurgeCache(context.TODO(), CLOUDFLARE_ZONE_ID, cloudflare.PurgeCacheRequest{
 			Files: []string{
 				fmt.Sprintf("https://%s/%s", CLOUDFLARE_HOST, o.Key),
 				fmt.Sprintf("https://%s/%s/", CLOUDFLARE_HOST, o.Key),
