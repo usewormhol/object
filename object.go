@@ -138,6 +138,7 @@ func Retrieve(key string) (*Object, error) {
 		Key:               key,
 		Name:              name,
 		SizeBytes:         *object.ContentLength,
+		LastModified:      *object.LastModified,
 		ExpirationSeconds: object.LastModified.Add(OBJECT_TIME_TO_LIVE).UTC().Unix(),
 		PresignedGetUrl:   url,
 	}, nil
