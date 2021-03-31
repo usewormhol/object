@@ -1,4 +1,4 @@
-name: "Run Go tests"
+name: "CI"
 
 
 on:
