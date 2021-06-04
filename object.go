@@ -40,7 +40,7 @@ var (
 	S3_BUCKET                   = env.String("WORMHOL_S3_BUCKET", "", env.Required)
 	S3_ACL                      = env.String("WORMHOL_S3_ACL", s3.ObjectCannedACLPrivate, env.Optional)
 	S3_SSE                      = env.String("WORMHOL_S3_SSE", s3.ServerSideEncryptionAes256, env.Optional)
-	S3_STORAGE_CLASS            = env.String("WORMHOL_S3_STORAGE_CLASS", s3.ObjectStorageClassOnezoneIa, env.Optional)
+	S3_STORAGE_CLASS            = env.String("WORMHOL_S3_STORAGE_CLASS", s3.ObjectStorageClassStandard, env.Optional)
 	S3_LIST_OBJECTS_MAX_KEYS    = int64(env.Int("WORMHOL_S3_LIST_OBJECTS_MAX_KEYS", 1000, env.Optional))
 	CLOUDFLARE_ZONE             = env.String("WORMHOL_CLOUDFLARE_ZONE", "", env.Optional)
 	CLOUDFLARE_ZONE_ID          = env.String("WORMHOL_CLOUDFLARE_ZONE_ID", "", env.Optional)
